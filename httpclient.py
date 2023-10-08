@@ -18,6 +18,8 @@
 # Write your own HTTP GET and POST
 # The point is to understand what you have to send and get experience with it
 
+import mimetypes
+import os
 import sys
 import socket
 import re
@@ -41,13 +43,19 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        return None
+        if data == None:
+            return None
+        code = int(data.split()[1])
+        return code
 
     def get_headers(self,data):
         return None
 
     def get_body(self, data):
-        return None
+        if data == None:
+            return None
+        body = data.split("\r\n\r\n")[1]
+        return body
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -70,11 +78,76 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         code = 500
         body = ""
+        parsedUrl = urllib.parse.urlparse(url)
+        path = parsedUrl.path
+        if path == "":
+            path = "/"
+        host = parsedUrl.hostname
+        port = parsedUrl.port
+        if port == None:
+            port = 80
+        self.connect(host, port)
+        try: 
+            request = "GET " + path + " HTTP/1.1\r\n" 
+            request += "Host: " + host + "\r\n"
+            self.sendall(request)
+            print("\nrequest: \n" + request)
+            self.socket.shutdown(socket.SHUT_WR)
+            buffer = self.recvall(self.socket)
+            print("buffer1: " + buffer)
+            print("codeb: " + str(self.get_code(buffer)))
+            code = self.get_code(buffer)
+            print("codea: " + str(code))
+            body = self.get_body(buffer)
+            if code == 301:
+                self.close()
+                self.connect(host, port)
+                newPath = buffer.split("Location")[1].split("\r\n")[0].split(" ")[1]
+                request = "GET " + newPath + " HTTP/1.1" + "\r\nHost: " + host + "\r\n\r\n"
+                print("new request: \n" + request)
+                self.sendall(request)
+                self.socket.shutdown(socket.SHUT_WR)
+                buffer = self.recvall(self.socket)
+                print("buffer2: " + buffer)
+                code = self.get_code(buffer)
+                body = self.get_body(buffer)
+        except Exception as e:
+            print( e)
+            self.close()
+        finally:
+            self.close()
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
         code = 500
         body = ""
+        parsedUrl = urllib.parse.urlparse(url)
+        path = parsedUrl.path
+        host = parsedUrl.hostname
+        self.connect(host, parsedUrl.port)
+        try:
+            if args == None:
+                args = ""
+            else:
+                args = urllib.parse.urlencode(args)
+            request = "POST " + path + " HTTP/1.1\r\n" 
+            request += "Host: " + host + "\r\n"
+            request += f"Content-Type: application/x-www-form-urlencoded\r\n"
+            request += "Content-Length: " + str(len(args)) + "\r\n"
+            request += "\r\n"
+            request += args
+            self.sendall(request)
+            self.socket.shutdown(socket.SHUT_WR)
+            buffer = self.recvall(self.socket)
+            code = self.get_code(buffer)
+            body = self.get_body(buffer)
+            print("code: "+ str(code))
+            print("body: "+ str(body))
+        except Exception as e:
+            print(e)
+            self.close()
+        finally:
+            self.close()
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
