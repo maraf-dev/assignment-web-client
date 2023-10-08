@@ -155,10 +155,10 @@ class HTTPClient(object):
             request += "Host: " + host + "\r\n"
             request += f"Content-Type: application/x-www-form-urlencoded\r\n"
             request += "Content-Length: " + str(len(args)) + "\r\n"
+            request += "Connection: close\r\n"
             request += "\r\n"
             request += args
             self.sendall(request)
-            self.socket.shutdown(socket.SHUT_WR)
             buffer = self.recvall(self.socket)
             code = self.get_code(buffer)
             body = self.get_body(buffer)
