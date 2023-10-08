@@ -14,15 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Do not use urllib's HTTP GET and POST mechanisms.
-# Write your own HTTP GET and POST
-# The point is to understand what you have to send and get experience with it
+######################################################################
 
-import mimetypes
-import os
+# Copyright 2023 Marafi Mergani
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+
+#        http://www.apache.org/licenses/LICENSE-2.0
+
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+
 import sys
 import socket
-import re
 # you may use urllib to encode data appropriately
 import urllib.parse
 
@@ -43,8 +53,6 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        if data == None:
-            return None
         code = int(data.split()[1])
         return code
 
@@ -52,8 +60,6 @@ class HTTPClient(object):
         return None
 
     def get_body(self, data):
-        if data == None:
-            return None
         body = data.split("\r\n\r\n")[1]
         return body
     
@@ -90,25 +96,40 @@ class HTTPClient(object):
         try: 
             request = "GET " + path + " HTTP/1.1\r\n" 
             request += "Host: " + host + "\r\n"
+            request += "User-Agent: mozilla/5.0 (x11; linux x86_64; rv:64.0) gecko/20100101 firefox/64.0\r\n"
+            request += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+            request += "Accept-Language: en-US,en;q=0.5\r\n"
+            request += "Accept-Encoding: gzip, deflate\r\n"
+            request += "Connection: close\r\n"
+            request += "Upgrade-Insecure-Requests: 1\r\n"
+            request += "DNT: 1\r\n"
+            request += "\r\n"
             self.sendall(request)
-            print("\nrequest: \n" + request)
-            self.socket.shutdown(socket.SHUT_WR)
+            print("request: \n" + request)
             buffer = self.recvall(self.socket)
-            print("buffer1: " + buffer)
-            print("codeb: " + str(self.get_code(buffer)))
+            print("buffer1: " + buffer + "\n")
             code = self.get_code(buffer)
-            print("codea: " + str(code))
             body = self.get_body(buffer)
             if code == 301:
                 self.close()
+                newUrl = buffer.split("Location")[1].split("\r\n")[0].split(" ")[1]
+                host = urllib.parse.urlparse(newUrl).hostname
+                newPath = urllib.parse.urlparse(newUrl).path
                 self.connect(host, port)
-                newPath = buffer.split("Location")[1].split("\r\n")[0].split(" ")[1]
-                request = "GET " + newPath + " HTTP/1.1" + "\r\nHost: " + host + "\r\n\r\n"
-                print("new request: \n" + request)
+                request = "GET " + newPath + " HTTP/1.1\r\n" 
+                request += "Host: " + host + "\r\n"
+                request += "User-Agent: mozilla/5.0 (x11; linux x86_64; rv:64.0) gecko/20100101 firefox/64.0\r\n"
+                request += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+                request += "Accept-Language: en-US,en;q=0.5\r\n"
+                request += "Accept-Encoding: gzip, deflate\r\n"
+                request += "Connection: close\r\n"
+                request += "Upgrade-Insecure-Requests: 1\r\n"
+                request += "DNT: 1\r\n"
+                request += "\r\n"               
+                print("new request__________________________________: \n" + request)
                 self.sendall(request)
-                self.socket.shutdown(socket.SHUT_WR)
                 buffer = self.recvall(self.socket)
-                print("buffer2: " + buffer)
+                print("buffer2: " + buffer + "\n")
                 code = self.get_code(buffer)
                 body = self.get_body(buffer)
         except Exception as e:
@@ -142,7 +163,7 @@ class HTTPClient(object):
             code = self.get_code(buffer)
             body = self.get_body(buffer)
             print("code: "+ str(code))
-            print("body: "+ str(body))
+            print("body: "+ str(body) + "\n")
         except Exception as e:
             print(e)
             self.close()
