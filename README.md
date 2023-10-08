@@ -18,5 +18,16 @@ examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
 
+References
+==========
+
+https://www.cs.unb.ca/~bremner/teaching/cs2613/books/python3-doc/library/urllib.parse.html
+https://http.dev/1.1
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+https://github.com/psf/requests/issues/3912
+https://chat.openai.com/
+https://www.urlencoder.io/python/
+
+
 
 
