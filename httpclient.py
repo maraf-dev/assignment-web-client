@@ -110,28 +110,6 @@ class HTTPClient(object):
             print("buffer1: " + buffer + "\n")
             code = self.get_code(buffer)
             body = self.get_body(buffer)
-            if code == 301:
-                self.close()
-                newUrl = buffer.split("Location")[1].split("\r\n")[0].split(" ")[1]
-                host = urllib.parse.urlparse(newUrl).hostname
-                newPath = urllib.parse.urlparse(newUrl).path
-                self.connect(host, port)
-                request = "GET " + newPath + " HTTP/1.1\r\n" 
-                request += "Host: " + host + "\r\n"
-                request += "User-Agent: mozilla/5.0 (x11; linux x86_64; rv:64.0) gecko/20100101 firefox/64.0\r\n"
-                request += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
-                request += "Accept-Language: en-US,en;q=0.5\r\n"
-                request += "Accept-Encoding: gzip, deflate\r\n"
-                request += "Connection: close\r\n"
-                request += "Upgrade-Insecure-Requests: 1\r\n"
-                request += "DNT: 1\r\n"
-                request += "\r\n"               
-                print("new request__________________________________: \n" + request)
-                self.sendall(request)
-                buffer = self.recvall(self.socket)
-                print("buffer2: " + buffer + "\n")
-                code = self.get_code(buffer)
-                body = self.get_body(buffer)
         except Exception as e:
             print( e)
             self.close()
