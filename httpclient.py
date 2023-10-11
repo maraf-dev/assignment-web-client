@@ -93,28 +93,23 @@ class HTTPClient(object):
         if port == None:
             port = 80
         self.connect(host, port)
-        try: 
-            request = "GET " + path + " HTTP/1.1\r\n" 
-            request += "Host: " + host + "\r\n"
-            request += "User-Agent: mozilla/5.0 (x11; linux x86_64; rv:64.0) gecko/20100101 firefox/64.0\r\n"
-            request += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
-            request += "Accept-Language: en-US,en;q=0.5\r\n"
-            request += "Accept-Encoding: gzip, deflate\r\n"
-            request += "Connection: close\r\n"
-            request += "Upgrade-Insecure-Requests: 1\r\n"
-            request += "DNT: 1\r\n"
-            request += "\r\n"
-            self.sendall(request)
-            print("request: \n" + request)
-            buffer = self.recvall(self.socket)
-            print("buffer1: " + buffer + "\n")
-            code = self.get_code(buffer)
-            body = self.get_body(buffer)
-        except Exception as e:
-            print( e)
-            self.close()
-        finally:
-            self.close()
+        request = "GET " + path + " HTTP/1.1\r\n" 
+        request += "Host: " + host + "\r\n"
+        request += "User-Agent: mozilla/5.0 (x11; linux x86_64; rv:64.0) gecko/20100101 firefox/64.0\r\n"
+        request += "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+        request += "Accept-Language: en-US,en;q=0.5\r\n"
+        request += "Accept-Encoding: gzip, deflate\r\n"
+        request += "Connection: close\r\n"
+        request += "Upgrade-Insecure-Requests: 1\r\n"
+        request += "DNT: 1\r\n"
+        request += "\r\n"
+        self.sendall(request)
+        print("request: \n" + request)
+        buffer = self.recvall(self.socket)
+        print("buffer1: " + buffer + "\n")
+        code = self.get_code(buffer)
+        body = self.get_body(buffer)
+        self.close()
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
@@ -124,29 +119,24 @@ class HTTPClient(object):
         path = parsedUrl.path
         host = parsedUrl.hostname
         self.connect(host, parsedUrl.port)
-        try:
-            if args == None:
-                args = ""
-            else:
-                args = urllib.parse.urlencode(args)
-            request = "POST " + path + " HTTP/1.1\r\n" 
-            request += "Host: " + host + "\r\n"
-            request += f"Content-Type: application/x-www-form-urlencoded\r\n"
-            request += "Content-Length: " + str(len(args)) + "\r\n"
-            request += "Connection: close\r\n"
-            request += "\r\n"
-            request += args
-            self.sendall(request)
-            buffer = self.recvall(self.socket)
-            code = self.get_code(buffer)
-            body = self.get_body(buffer)
-            print("code: "+ str(code))
-            print("body: "+ str(body) + "\n")
-        except Exception as e:
-            print(e)
-            self.close()
-        finally:
-            self.close()
+        if args == None:
+            args = ""
+        else:
+            args = urllib.parse.urlencode(args)
+        request = "POST " + path + " HTTP/1.1\r\n" 
+        request += "Host: " + host + "\r\n"
+        request += f"Content-Type: application/x-www-form-urlencoded\r\n"
+        request += "Content-Length: " + str(len(args)) + "\r\n"
+        request += "Connection: close\r\n"
+        request += "\r\n"
+        request += args
+        self.sendall(request)
+        buffer = self.recvall(self.socket)
+        code = self.get_code(buffer)
+        body = self.get_body(buffer)
+        print("code: "+ str(code))
+        print("body: "+ str(body) + "\n")
+        self.close()
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
