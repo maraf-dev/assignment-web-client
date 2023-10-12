@@ -104,9 +104,7 @@ class HTTPClient(object):
         request += "DNT: 1\r\n"
         request += "\r\n"
         self.sendall(request)
-        print("request: \n" + request)
         buffer = self.recvall(self.socket)
-        print("buffer1: " + buffer + "\n")
         code = self.get_code(buffer)
         body = self.get_body(buffer)
         self.close()
@@ -134,8 +132,6 @@ class HTTPClient(object):
         buffer = self.recvall(self.socket)
         code = self.get_code(buffer)
         body = self.get_body(buffer)
-        print("code: "+ str(code))
-        print("body: "+ str(body) + "\n")
         self.close()
         return HTTPResponse(code, body)
 
